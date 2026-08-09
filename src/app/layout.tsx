@@ -1,48 +1,44 @@
 import type { Metadata } from 'next';
-import { Inter, JetBrains_Mono } from 'next/font/google';
-
-const inter = Inter({
-  subsets: ['latin'],
-  variable: '--font-inter',
-  display: 'swap',
-});
-
-const jetBrainsMono = JetBrains_Mono({
-  subsets: ['latin'],
-  variable: '--font-jetbrains-mono',
-  display: 'swap',
-});
+import '../style.css';
 
 export const metadata: Metadata = {
-  title: 'Md Kaioum Islam - Portfolio OS',
-  description: 'Interactive portfolio OS',
+    title: 'Md Kaioum Islam - Portfolio',
+    description:
+        "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
+    openGraph: {
+        type: 'website',
+        url: 'https://mdkaioumislam.dev/',
+        title: 'Md Kaioum Islam - Full-Stack Software Engineer',
+        description:
+            "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
+        images: [
+            {
+                url: '/images/profile.jpg',
+            },
+        ],
+    },
+    twitter: {
+        card: 'summary_large_image',
+        site: 'https://mdkaioumislam.dev/',
+        title: 'Md Kaioum Islam - Full-Stack Software Engineer',
+        description:
+            "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
+        images: ['/images/profile.jpg'],
+    },
+    icons: {
+        icon: '/images/favicon.ico',
+        apple: '/images/apple-touch-icon.png',
+    },
 };
 
-export default function OSLayout({
-  children,
+export default function RootLayout({
+    children,
 }: {
-  children: React.ReactNode;
+    children: React.ReactNode;
 }) {
-  /*
-   * NOTE: This layout is served inside a CSS3D iframe by MonitorScreen.ts.
-   * It must NOT render a nested <html>/<body> — Next.js App Router handles
-   * the outer shell via the root src/app/layout.tsx. We only inject the
-   * font variables and base styles onto the children wrapper.
-   */
-  return (
-    <div
-      className={`${inter.variable} ${jetBrainsMono.variable} ${inter.className}`}
-      style={{
-        margin: 0,
-        padding: 0,
-        width: '100%',
-        height: '100%',
-        backgroundColor: '#0a0f1e',
-        fontFamily: 'Inter, sans-serif',
-        boxSizing: 'border-box',
-      }}
-    >
-      {children}
-    </div>
-  );
+    return (
+        <html lang="en">
+            <body>{children}</body>
+        </html>
+    );
 }
