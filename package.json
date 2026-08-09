@@ -24,6 +24,7 @@
         "three": "^0.166.1"
     },
     "devDependencies": {
+        "@tailwindcss/postcss": "^4.3.3",
         "@types/node": "~18.19.0",
         "@types/nodemailer": "^6.4.15",
         "@types/react": "^18.3.3",
