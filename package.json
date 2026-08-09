@@ -1,27 +1,36 @@
 {
-  "name": "final-portfolio",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "eslint"
-  },
-  "dependencies": {
-    "next": "16.3.0",
-    "react": "19.2.8",
-    "react-dom": "19.2.8"
-  },
-  "devDependencies": {
-    "@tailwindcss/postcss": "^4",
-    "@types/node": "^20",
-    "@types/react": "^19",
-    "@types/react-dom": "^19",
-    "eslint": "^9",
-    "eslint-config-next": "16.3.0",
-    "tailwindcss": "^4",
-    "typescript": "^5"
-  },
-  "packageManager": "yarn@1.22.22"
+    "name": "portfolio-website",
+    "version": "1.0.0",
+    "private": true,
+    "license": "UNLICENSED",
+    "scripts": {
+        "dev": "next dev",
+        "build": "next build",
+        "start": "next start",
+        "lint": "next lint"
+    },
+    "dependencies": {
+        "@tweenjs/tween.js": "^21.0.0",
+        "bezier-easing": "^2.1.0",
+        "camera-controls": "^2.9.0",
+        "framer-motion": "^11.0.0",
+        "gsap": "^3.12.5",
+        "lil-gui": "^0.19.2",
+        "next": "^16.3.0",
+        "nodemailer": "^6.9.14",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "stats.js": "^0.17.0",
+        "three": "^0.166.1"
+    },
+    "devDependencies": {
+        "@types/node": "~18.19.0",
+        "@types/nodemailer": "^6.4.15",
+        "@types/react": "^18.3.3",
+        "@types/react-dom": "^18.3.0",
+        "@types/stats.js": "^0.17.0",
+        "@types/three": "^0.166.0",
+        "raw-loader": "^4.0.2",
+        "typescript": "^5.4.5"
+    }
 }
