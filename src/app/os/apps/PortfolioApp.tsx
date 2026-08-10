@@ -52,7 +52,7 @@ const SKILL_GROUPS: { label: string; color: string; skills: string[] }[] = [
   {
     label: 'Auth & DevOps',
     color: '#ef4444',
-    skills: ['Firebase', 'NextAuth', 'JWT', 'Docker', 'Git', 'GitHub', 'CI/CD', 'Puppeteer'],
+    skills: ['Firebase', 'NextAuth', 'JWT', 'Docker', 'Git', 'GitHub', 'Puppeteer'],
   },
   {
     label: 'Testing',
