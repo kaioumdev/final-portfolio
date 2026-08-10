@@ -33,18 +33,32 @@ const C = {
 const MONO  = "'Courier New', Courier, monospace";
 const SERIF = "Georgia, 'Times New Roman', serif";
 
-const ALL_SKILLS = [
-  // Frontend
-  'React.js', 'React Native', 'Next.js', 'TypeScript', 'JavaScript (ES6+)',
-  'Redux', 'HTML5', 'CSS3', 'Tailwind CSS', 'Bootstrap', 'ShadCN', 'Framer Motion',
-  // Backend
-  'Node.js', 'Express.js', 'REST API', 'GraphQL',
-  // Database
-  'MongoDB', 'Mongoose', 'PostgreSQL', 'MySQL', 'Prisma',
-  // Auth & Tools
-  'Firebase', 'NextAuth', 'JWT', 'Docker', 'Git', 'GitHub', 'CI/CD', 'Puppeteer',
-  // Testing
-  'Jest', 'React Testing Library', 'Vitest',
+const SKILL_GROUPS: { label: string; color: string; skills: string[] }[] = [
+  {
+    label: 'Frontend',
+    color: '#6366f1',
+    skills: ['React.js', 'React Native', 'Next.js', 'TypeScript', 'JavaScript (ES6+)', 'Redux', 'HTML5', 'CSS3', 'Tailwind CSS', 'Bootstrap', 'ShadCN', 'Framer Motion'],
+  },
+  {
+    label: 'Backend',
+    color: '#10b981',
+    skills: ['Node.js', 'Express.js', 'REST API', 'GraphQL'],
+  },
+  {
+    label: 'Database',
+    color: '#f59e0b',
+    skills: ['MongoDB', 'Mongoose', 'PostgreSQL', 'MySQL', 'Prisma'],
+  },
+  {
+    label: 'Auth & DevOps',
+    color: '#ef4444',
+    skills: ['Firebase', 'NextAuth', 'JWT', 'Docker', 'Git', 'GitHub', 'CI/CD', 'Puppeteer'],
+  },
+  {
+    label: 'Testing',
+    color: '#8b5cf6',
+    skills: ['Jest', 'React Testing Library', 'Vitest'],
+  },
 ];
 
 function Footer() {
@@ -190,8 +204,38 @@ function AboutPage() {
       </p>
 
       <hr style={{ border: 'none', borderTop: `1px solid ${C.hr}`, margin: '0 0 20px 0' }} />
-      <p style={{ fontFamily: SERIF, fontSize: 15, fontWeight: 700, color: C.heading, margin: '0 0 12px 0' }}>Skills &amp; Technologies</p>
-      <div>{ALL_SKILLS.map(s => <Chip key={s} text={s} />)}</div>
+      <p style={{ fontFamily: SERIF, fontSize: 15, fontWeight: 700, color: C.heading, margin: '0 0 16px 0' }}>Skills &amp; Technologies</p>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+        {SKILL_GROUPS.map(group => (
+          <div key={group.label} style={{
+            background: C.cardBg,
+            border: `1px solid ${C.cardBorder}`,
+            borderRadius: 4,
+            overflow: 'hidden',
+          }}>
+            {/* Category header with left accent bar */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10,
+              padding: '8px 14px',
+              borderBottom: `1px solid ${C.cardBorder}`,
+              background: C.sidebar,
+            }}>
+              <span style={{
+                display: 'inline-block', width: 3, height: 14,
+                borderRadius: 2, background: group.color, flexShrink: 0,
+              }} />
+              <span style={{
+                fontFamily: MONO, fontSize: 11, fontWeight: 700,
+                color: group.color, letterSpacing: '0.08em', textTransform: 'uppercase',
+              }}>{group.label}</span>
+            </div>
+            {/* Chips */}
+            <div style={{ padding: '10px 12px' }}>
+              {group.skills.map(s => <Chip key={s} text={s} />)}
+            </div>
+          </div>
+        ))}
+      </div>
       <Footer />
     </div>
   );
