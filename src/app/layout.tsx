@@ -7,7 +7,7 @@ export const metadata: Metadata = {
         "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
     openGraph: {
         type: 'website',
-        url: 'https://mdkaioumislam.dev/',
+        url: 'https://kaioumdev.vercel.app/',
         title: 'Md Kaioum Islam - Full-Stack Software Engineer',
         description:
             "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        site: 'https://mdkaioumislam.dev/',
+        site: 'https://kaioumdev.vercel.app/',
         title: 'Md Kaioum Islam - Full-Stack Software Engineer',
         description:
             "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
