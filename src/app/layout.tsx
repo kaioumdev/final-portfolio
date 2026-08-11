@@ -19,7 +19,7 @@ export const metadata: Metadata = {
     },
     twitter: {
         card: 'summary_large_image',
-        site: 'https://kaioumdev.vercel.app/',
+        site: 'https://x.com/kaioumev',
         title: 'Md Kaioum Islam - Full-Stack Software Engineer',
         description:
             "I'm Md Kaioum Islam, a Full-Stack Software Engineer. Welcome to my interactive 3D portfolio.",
