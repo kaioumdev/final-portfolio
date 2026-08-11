@@ -95,7 +95,7 @@ export const PROJECTS: ProjectEntry[] = [
   },
   {
     id: 'lebaba',
-    title: 'Lebaba Shopping Mall — Full-Stack E-Commerce Platform',
+    title: 'Shopping Mall — Full-Stack E-Commerce Platform',
     description:
       'A production-ready shopping mall platform with cinematic UI, Stripe checkout, role-based admin CMS, ' +
       'and fully documented REST API — built to real-world production standards.',
