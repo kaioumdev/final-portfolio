@@ -68,7 +68,7 @@ export const PROJECTS: ProjectEntry[] = [
   },
   {
     id: 'ubar',
-    title: 'Ubar Ride Share — Full-Stack Ride-Hailing Platform',
+    title: 'Ride Share — Full-Stack Ride-Hailing Platform',
     description:
       'A production-ready Uber-like ride-sharing application with real-time GPS tracking, ' +
       'live ride lifecycle management, and dual authentication for passengers and drivers.',
