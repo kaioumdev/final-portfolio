@@ -128,6 +128,27 @@ export default class MonitorScreen extends EventEmitter {
             },
             false
         );
+
+        // ── Touch support ─────────────────────────────────────────────────────
+        document.addEventListener('touchstart', (event) => {
+            const touch = event.touches[0];
+            if (!touch) return;
+            const target = document.elementFromPoint(touch.clientX, touch.clientY);
+            const inComp = (target as HTMLElement)?.id === 'computer-screen';
+            if (inComp && !this.prevInComputer) {
+                this.camera.trigger('enterMonitor');
+            }
+            this.inComputer = inComp;
+            this.prevInComputer = inComp;
+        }, { passive: true });
+
+        document.addEventListener('touchend', () => {
+            if (this.inComputer) {
+                this.camera.trigger('leftMonitor');
+            }
+            this.inComputer = false;
+            this.prevInComputer = false;
+        }, { passive: true });
     }
 
     /**

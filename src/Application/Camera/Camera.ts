@@ -84,6 +84,26 @@ export default class Camera extends EventEmitter {
             }
         });
 
+        // Touch support for mobile — desktop 3D interaction only
+        // On mobile (<768px): HelpPrompt handles the tap → mobileOpenPortfolio event.
+        // Camera touchstart is only used for desktop-like touch devices (tablets ≥768px).
+        document.addEventListener('touchstart', (event) => {
+            if (window.innerWidth < 768) return; // mobile handled by HelpPrompt
+            const targetId = (event.target as HTMLElement).id;
+            if (targetId === 'prevent-click' || targetId === 'computer-screen') return;
+            if (
+                this.currentKeyframe === CameraKey.IDLE ||
+                this.targetKeyframe === CameraKey.IDLE
+            ) {
+                this.transition(CameraKey.DESK);
+            } else if (
+                this.currentKeyframe === CameraKey.DESK ||
+                this.targetKeyframe === CameraKey.DESK
+            ) {
+                this.transition(CameraKey.IDLE);
+            }
+        }, { passive: true });
+
         this.setPostLoadTransition();
         this.setInstance();
         this.setMonitorListeners();

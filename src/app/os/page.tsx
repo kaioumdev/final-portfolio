@@ -23,17 +23,15 @@ const WINDOW_W = 920;
 const WINDOW_H = 650;
 const MONO = "'Courier New', Courier, monospace";
 
-// ── Desktop icon definitions — only Portfolio ─────────────────────────────────
 const ICONS: { id: AppId; label: string; emoji: string }[] = [
   { id: 'portfolio', label: 'Portfolio', emoji: '🖥️' },
 ];
 
-// ── Window title map ──────────────────────────────────────────────────────────
 const TITLES: Record<AppId, string> = {
   portfolio: 'Md Kaioum Islam — Portfolio',
 };
 
-// ── Desktop Icon component ────────────────────────────────────────────────────
+// ── Desktop Icon ──────────────────────────────────────────────────────────────
 function DesktopIcon({ id, label, emoji, onOpen }: {
   id: AppId; label: string; emoji: string; onOpen: () => void;
 }) {
@@ -77,32 +75,36 @@ function DesktopIcon({ id, label, emoji, onOpen }: {
   );
 }
 
-// ── App Window component ──────────────────────────────────────────────────────
-function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
+// ── App Window ────────────────────────────────────────────────────────────────
+function AppWindow({ win, onClose, onMinimize, onFocus, children, forceMobile }: {
   win: OpenWindow;
   onClose: () => void;
   onMinimize: () => void;
   onFocus: () => void;
   children: React.ReactNode;
+  forceMobile: boolean;
 }) {
   const [pos, setPos] = useState({ x: win.x, y: win.y });
-  const [isMaximized, setIsMaximized] = useState(false);
+  // On mobile, start maximized and stay maximized
+  const [isMaximized, setIsMaximized] = useState(forceMobile);
   const [closHov, setClosHov] = useState(false);
   const [minHov, setMinHov] = useState(false);
   const [maxHov, setMaxHov] = useState(false);
   const drag = useRef<{ sx: number; sy: number; ox: number; oy: number } | null>(null);
 
+  // Keep maximized in sync when forceMobile changes (e.g. orientation change)
+  useEffect(() => {
+    if (forceMobile) setIsMaximized(true);
+  }, [forceMobile]);
+
   const handleTitleMouseDown = (e: React.MouseEvent) => {
-    if (isMaximized) return; // don't drag when maximized
+    if (isMaximized) return;
     e.preventDefault();
     onFocus();
     drag.current = { sx: e.clientX, sy: e.clientY, ox: pos.x, oy: pos.y };
     const move = (ev: MouseEvent) => {
       if (!drag.current) return;
-      setPos({
-        x: drag.current.ox + ev.clientX - drag.current.sx,
-        y: drag.current.oy + ev.clientY - drag.current.sy,
-      });
+      setPos({ x: drag.current.ox + ev.clientX - drag.current.sx, y: drag.current.oy + ev.clientY - drag.current.sy });
     };
     const up = () => {
       drag.current = null;
@@ -115,23 +117,19 @@ function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
 
   const title = TITLES[win.id];
 
-  // Maximized: fill the entire parent (position absolute 0,0, 100%x100%)
   const maximizedStyle: React.CSSProperties = {
-    position: 'absolute',
-    left: 0, top: 0,
+    position: 'absolute', left: 0, top: 0,
     width: '100%', height: '100%',
     marginLeft: 0, marginTop: 0,
     zIndex: win.zIndex,
     display: 'flex', flexDirection: 'column',
     borderRadius: 0, overflow: 'hidden',
-    boxShadow: 'none',
-    border: 'none',
+    boxShadow: 'none', border: 'none',
   };
 
   const normalStyle: React.CSSProperties = {
     position: 'absolute',
-    left: '50%',
-    top: '50%',
+    left: '50%', top: '50%',
     marginLeft: `calc(${pos.x}px - ${WINDOW_W / 2}px)`,
     marginTop: `calc(${pos.y}px - ${WINDOW_H / 2}px)`,
     zIndex: win.zIndex,
@@ -162,7 +160,7 @@ function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
           borderBottom: '1px solid rgba(255,255,255,0.08)',
         }}
       >
-        {/* Left: minimize dot */}
+        {/* Left: minimize */}
         <button
           onClick={e => { e.stopPropagation(); onMinimize(); }}
           onMouseEnter={() => setMinHov(true)} onMouseLeave={() => setMinHov(false)}
@@ -174,7 +172,7 @@ function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
           }}
         />
 
-        {/* Centered title */}
+        {/* Center title */}
         <span style={{
           position: 'absolute', left: '50%', transform: 'translateX(-50%)',
           fontFamily: MONO, fontSize: 11, color: TITLEBAR_TEXT, opacity: 0.8,
@@ -184,27 +182,26 @@ function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
           {title}
         </span>
 
-        {/* Right: maximize/restore + close */}
+        {/* Right: maximize (desktop only) + close */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          {/* Maximize / Restore button */}
-          <button
-            onClick={e => { e.stopPropagation(); setIsMaximized(m => !m); }}
-            onMouseEnter={() => setMaxHov(true)} onMouseLeave={() => setMaxHov(false)}
-            title={isMaximized ? 'Restore' : 'Maximize'}
-            style={{
-              width: 26, height: 22, borderRadius: 5, border: 'none', padding: 0,
-              cursor: 'pointer', flexShrink: 0,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              background: maxHov ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)',
-              color: '#ffffff', fontSize: 11, lineHeight: 1,
-              fontFamily: MONO, fontWeight: 700,
-              transition: 'background 0.15s',
-            }}
-          >
-            {isMaximized ? '⊟' : '⊞'}
-          </button>
-
-          {/* Close button */}
+          {!forceMobile && (
+            <button
+              onClick={e => { e.stopPropagation(); setIsMaximized(m => !m); }}
+              onMouseEnter={() => setMaxHov(true)} onMouseLeave={() => setMaxHov(false)}
+              title={isMaximized ? 'Restore' : 'Maximize'}
+              style={{
+                width: 26, height: 22, borderRadius: 5, border: 'none', padding: 0,
+                cursor: 'pointer', flexShrink: 0,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                background: maxHov ? 'rgba(255,255,255,0.25)' : 'rgba(255,255,255,0.12)',
+                color: '#ffffff', fontSize: 11, lineHeight: 1,
+                fontFamily: MONO, fontWeight: 700,
+                transition: 'background 0.15s',
+              }}
+            >
+              {isMaximized ? '⊟' : '⊞'}
+            </button>
+          )}
           <button
             onClick={e => { e.stopPropagation(); onClose(); }}
             onMouseEnter={() => setClosHov(true)} onMouseLeave={() => setClosHov(false)}
@@ -230,13 +227,22 @@ function AppWindow({ win, onClose, onMinimize, onFocus, children }: {
 
 // ── Main OS Page ──────────────────────────────────────────────────────────────
 export default function MonitorApp() {
-  // Auto-open the portfolio window on mount
   const [windows, setWindows] = useState<OpenWindow[]>([
     { id: 'portfolio', zIndex: 100, x: 0, y: 0 },
   ]);
   const [minimized, setMinimized] = useState<AppId[]>([]);
   const [time, setTime] = useState('');
   const topZ = useRef(100);
+
+  // Detect mobile viewport inside the CSS3D iframe
+  const [isMobile, setIsMobile] = useState(false);
+  useEffect(() => {
+    const mq = window.matchMedia('(max-width: 820px)');
+    setIsMobile(mq.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   useEffect(() => {
     const tick = () => setTime(new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }));
@@ -285,22 +291,24 @@ export default function MonitorApp() {
       {/* ── Desktop area ── */}
       <div style={{ flex: 1, position: 'relative', overflow: 'hidden' }}>
 
-        {/* Left column of desktop icons */}
-        <div style={{
-          position: 'absolute', top: 14, left: 10,
-          display: 'flex', flexDirection: 'column', gap: 4,
-          zIndex: 10,
-        }}>
-          {ICONS.map(icon => (
-            <DesktopIcon
-              key={icon.id}
-              id={icon.id}
-              label={icon.label}
-              emoji={icon.emoji}
-              onOpen={() => openWindow(icon.id)}
-            />
-          ))}
-        </div>
+        {/* Desktop icons — hidden on mobile (window is auto-maximized) */}
+        {!isMobile && (
+          <div style={{
+            position: 'absolute', top: 14, left: 10,
+            display: 'flex', flexDirection: 'column', gap: 4,
+            zIndex: 10,
+          }}>
+            {ICONS.map(icon => (
+              <DesktopIcon
+                key={icon.id}
+                id={icon.id}
+                label={icon.label}
+                emoji={icon.emoji}
+                onOpen={() => openWindow(icon.id)}
+              />
+            ))}
+          </div>
+        )}
 
         {/* Windows */}
         <AnimatePresence>
@@ -313,6 +321,7 @@ export default function MonitorApp() {
                 onClose={() => closeWindow(w.id)}
                 onMinimize={() => minimizeWindow(w.id)}
                 onFocus={() => focusWindow(w.id)}
+                forceMobile={isMobile}
               >
                 {w.id === 'portfolio' && <PortfolioApp />}
               </AppWindow>
@@ -327,7 +336,6 @@ export default function MonitorApp() {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 14px', zIndex: 9999,
       }}>
-        {/* Left: brand + open window buttons */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontFamily: MONO, fontSize: 11, fontWeight: 700, color: '#ffffff', marginRight: 6 }}>
             Md Kaioum Islam
@@ -352,8 +360,6 @@ export default function MonitorApp() {
             );
           })}
         </div>
-
-        {/* Right: clock */}
         <span style={{ fontFamily: MONO, fontSize: 11, color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums' }}>
           {time}
         </span>

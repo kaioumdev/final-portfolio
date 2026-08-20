@@ -104,7 +104,8 @@ export class DeskKeyframe extends CameraKeyframeInstance {
             0.025;
 
         const aspect = this.sizes.height / this.sizes.width;
-        this.targetPos.z = this.origin.z + aspect * 3000 - 1800;
+        const mobileBoost = this.sizes.width < 768 ? -1600 : 0;
+        this.targetPos.z = this.origin.z + aspect * 3000 - 1800 + mobileBoost;
 
         this.focalPoint.copy(this.targetFoc);
         this.position.copy(this.targetPos);
@@ -123,13 +124,16 @@ export class IdleKeyframe extends CameraKeyframeInstance {
     }
 
     update() {
+        const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+        // Mobile: bring camera ~55% closer so 3D room fills the screen
+        const scale = isMobile ? 0.45 : 1.0;
         this.position.x =
-            Math.sin((this.time.elapsed + 19000) * 0.00008) * this.origin.x;
+            Math.sin((this.time.elapsed + 19000) * 0.00008) * this.origin.x * scale;
         this.position.y =
-            Math.sin((this.time.elapsed + 1000) * 0.000004) * 4000 +
+            (Math.sin((this.time.elapsed + 1000) * 0.000004) * 4000 +
             this.origin.y -
-            3000;
-        this.position.z = this.position.z;
+            3000) * scale;
+        this.position.z = this.origin.z * scale;
     }
 }
 
