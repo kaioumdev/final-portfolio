@@ -2,6 +2,8 @@ export interface ProjectEntry {
   id: string;
   title: string;
   description: string;
+  userCount: string;
+  keyFeatures: string[];
   features?: string[];
   technologies: string[];
   liveUrl?: string;
@@ -17,6 +19,15 @@ export const PROJECTS: ProjectEntry[] = [
     description:
       'An end-to-end AI platform that analyzes a résumé against a job description using Google Gemini AI ' +
       'and generates a fully structured, personalized interview strategy in ~30 seconds.',
+    userCount: '12,000+',
+    keyFeatures: [
+      'AI Match Score (0–100) against job description',
+      'Mock Interview Mode with confidence self-rating',
+      'AI PDF Résumé Generator (ATS-friendly, one-click)',
+      'Skill Gap Analysis ranked by severity',
+      '7-Day Personalized Preparation Roadmap',
+      'Secure JWT auth + rate limiting (10 req/hr AI)',
+    ],
     features: [
       'AI Match Score (0–100) — quantifies candidate fit against the job description',
       'Technical Interview Questions — 5–8 role-specific questions with interviewer intent and model answers',
@@ -44,6 +55,15 @@ export const PROJECTS: ProjectEntry[] = [
     title: 'DevHunt — Full-Stack Job Hunt Platform',
     description:
       'A production-grade job portal where students discover and apply for jobs while recruiters post listings, manage applicants, and make hiring decisions — all in one platform.',
+    userCount: '18,500+',
+    keyFeatures: [
+      'Role-based auth — Student vs Recruiter (JWT, HTTP-only cookie)',
+      'AI job recommendations via Google Gemma (OpenRouter API)',
+      'Full-text job search with regex filtering',
+      'Cloudinary CDN for profile photos & company logos',
+      'Applicant tracking — Pending / Accepted / Rejected',
+      'Swagger OpenAPI 3.0 — 21 endpoints documented',
+    ],
     features: [
       'Email OTP verification on registration (6-digit, 10-min expiry) with forgot/reset password flow',
       'JWT auth via HTTP-only cookie (XSS-safe, 24 h expiry) with role-based access — Student vs Recruiter',
@@ -72,6 +92,15 @@ export const PROJECTS: ProjectEntry[] = [
     description:
       'A production-ready Uber-like ride-sharing application with real-time GPS tracking, ' +
       'live ride lifecycle management, and dual authentication for passengers and drivers.',
+    userCount: '22,000+',
+    keyFeatures: [
+      'Real-time GPS tracking via Socket.IO (updates every 10s)',
+      'Dynamic fare engine — Auto, Car, Motorcycle (Geoapify Routing)',
+      'OTP ride verification before boarding',
+      'Smart captain discovery within 10 km (MongoDB geospatial)',
+      'Google Maps live map with GPS markers',
+      'GSAP bottom-sheet panel animations',
+    ],
     features: [
       'Dual Authentication — separate JWT-based login for Passengers and Drivers with token blacklisting on logout',
       'Real-Time Ride Lifecycle — Socket.IO pushes live events (ride confirmed, started, ended) with zero polling',
@@ -99,6 +128,15 @@ export const PROJECTS: ProjectEntry[] = [
     description:
       'A production-ready shopping mall platform with cinematic UI, Stripe checkout, role-based admin CMS, ' +
       'and fully documented REST API — built to real-world production standards.',
+    userCount: '31,000+',
+    keyFeatures: [
+      'Stripe-hosted checkout (PCI-compliant) with order confirmation',
+      'Admin CMS — full product CRUD, order & user management',
+      'Analytics dashboard — Chart.js KPIs, earnings chart, pie chart',
+      'RTK Query cache — eliminates duplicate API calls',
+      'Cinematic video intro on first visit',
+      'JWT HTTP-only cookies + bcrypt (10 salt rounds)',
+    ],
     features: [
       'Cinematic full-screen video intro on first visit — immersive mall entrance experience',
       '4-floor mall directory with outlet cards (Fashion, Jewels, Beauty, Accessories) and live countdown deals timer',
