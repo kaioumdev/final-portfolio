@@ -335,20 +335,60 @@ interface TiltState {
   spotY: number;
 }
 
+function extractStats(project: (typeof PROJECTS)[number]): { label: string; value: string }[] {
+  const stats: { label: string; value: string }[] = [];
+  const featuresText = (project.features ?? []).join(' ');
+  if (featuresText.includes('1,000+') || featuresText.includes('concurrent')) stats.push({ value: '1,000+', label: 'Users' });
+  if (featuresText.includes('< 150ms')) stats.push({ value: '< 150ms', label: 'API Response' });
+  else if (featuresText.includes('< 200ms')) stats.push({ value: '< 200ms', label: 'API Response' });
+  else if (featuresText.includes('< 300ms')) stats.push({ value: '< 300ms', label: 'API Response' });
+  else if (featuresText.includes('< 1s')) stats.push({ value: '< 1s', label: 'AI Response' });
+  const featureCount = project.features?.length ?? 0;
+  if (featureCount > 0) stats.push({ value: `${featureCount}`, label: 'Key Features' });
+  if (stats.length < 3) stats.push({ value: `${project.technologies.length}`, label: 'Technologies' });
+  return stats.slice(0, 3);
+}
+
 function ProjectCard({ project, index, reducedMotion }: ProjectCardProps) {
+  const isMobile = useIsMobile();
   const cardRef = React.useRef<HTMLDivElement>(null);
+  const videoRef = React.useRef<HTMLVideoElement>(null);
   const gsapTweenRef = React.useRef<gsap.core.Tween | null>(null);
   const willChangeTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [isHovered, setIsHovered] = React.useState(false);
   const [tilt, setTilt] = React.useState<TiltState>({ rotateX: 0, rotateY: 0, spotX: 0.5, spotY: 0.5 });
   const [willChange, setWillChange] = React.useState<'auto' | 'transform'>('auto');
+  const [isVideoPlaying, setIsVideoPlaying] = React.useState(true);
+
+  // Mobile: tap video to toggle play/pause
+  const handleVideoTap = () => {
+    if (!isMobile || !videoRef.current) return;
+    if (videoRef.current.paused) {
+      videoRef.current.play().catch(() => {});
+      setIsVideoPlaying(true);
+    } else {
+      videoRef.current.pause();
+      setIsVideoPlaying(false);
+    }
+  };
 
   React.useEffect(() => {
     return () => {
       gsapTweenRef.current?.kill();
       if (willChangeTimeoutRef.current) clearTimeout(willChangeTimeoutRef.current);
     };
+  }, []);
+
+  // Ensure video plays on mobile — muted+playsInline autoplay is allowed
+  React.useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    // Small delay so browser is ready
+    const t = setTimeout(() => {
+      video.play().catch(() => {});
+    }, 100);
+    return () => clearTimeout(t);
   }, []);
 
   const handleAnimationComplete = () => {
@@ -360,14 +400,17 @@ function ProjectCard({ project, index, reducedMotion }: ProjectCardProps) {
   };
 
   const handleMouseEnter = () => {
-    setIsHovered(true); setWillChange('transform');
+    setIsHovered(true);
+    setWillChange('transform');
     gsapTweenRef.current?.pause();
+    videoRef.current?.play().catch(() => {});
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     if (reducedMotion || !cardRef.current) return;
     const rect = cardRef.current.getBoundingClientRect();
-    const w = rect.width || 1; const h = rect.height || 1;
+    const w = rect.width || 1;
+    const h = rect.height || 1;
     const nx = (e.clientX - rect.left) / w;
     const ny = (e.clientY - rect.top) / h;
     const rx = Math.max(-15, Math.min(15, (ny - 0.5) * 30));
@@ -381,11 +424,18 @@ function ProjectCard({ project, index, reducedMotion }: ProjectCardProps) {
     gsapTweenRef.current?.resume();
     if (willChangeTimeoutRef.current) clearTimeout(willChangeTimeoutRef.current);
     willChangeTimeoutRef.current = setTimeout(() => setWillChange('auto'), 400);
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
   };
 
-  const initialAnim = reducedMotion ? { opacity: 0 } : { opacity: 0, y: 40, rotateX: -20 };
-  const animateAnim = reducedMotion ? { opacity: 1 } : { opacity: 1, y: 0, rotateX: 0 };
-  const transitionAnim = reducedMotion ? { duration: 0.15 } : { ...ENTRANCE_TRANSITION, delay: (index * STAGGER_DELAY_MS) / 1000 };
+  // Mobile: no entrance animation — show card immediately so video renders
+  const initialAnim = (reducedMotion || isMobile) ? { opacity: 1 } : { opacity: 0, y: 40, rotateX: -20 };
+  const animateAnim = { opacity: 1, y: 0, rotateX: 0 };
+  const transitionAnim = (reducedMotion || isMobile)
+    ? { duration: 0 }
+    : { ...ENTRANCE_TRANSITION, delay: (index * STAGGER_DELAY_MS) / 1000 };
 
   const shadowX = isHovered && !reducedMotion ? -tilt.rotateY * 0.5 : 0;
   const shadowY = isHovered && !reducedMotion ? -tilt.rotateX * 0.5 : 0;
@@ -400,46 +450,146 @@ function ProjectCard({ project, index, reducedMotion }: ProjectCardProps) {
   return (
     <motion.div
       ref={cardRef}
-      initial={initialAnim} animate={animateAnim} transition={transitionAnim}
+      initial={initialAnim}
+      animate={animateAnim}
+      transition={transitionAnim}
       onAnimationComplete={handleAnimationComplete}
-      onMouseEnter={handleMouseEnter} onMouseMove={handleMouseMove} onMouseLeave={handleMouseLeave}
+      onMouseEnter={handleMouseEnter}
+      onMouseMove={handleMouseMove}
+      onMouseLeave={handleMouseLeave}
       style={{
-        position: 'relative', transformStyle: 'preserve-3d', borderRadius: 6,
-        background: C.cardBg, border: `1px solid ${C.cardBorder}`,
-        minHeight: 320, overflow: 'visible', boxSizing: 'border-box',
-        boxShadow, willChange,
+        position: 'relative',
+        transformStyle: 'preserve-3d',
+        borderRadius: 6,
+        background: C.cardBg,
+        border: `1px solid ${C.cardBorder}`,
+        overflow: 'visible',
+        boxSizing: 'border-box',
+        boxShadow,
+        willChange,
         ...(hoverTransform
           ? { transform: hoverTransform, transition: 'none' }
-          : isHovered ? {}
+          : isHovered
+          ? {}
           : { transition: 'transform 400ms ease-out, box-shadow 400ms ease-out' }),
       }}
     >
+      {/* Spotlight overlay */}
       {isHovered && !reducedMotion && (
         <div aria-hidden="true" style={{
-          position: 'absolute', inset: 0, borderRadius: 6, pointerEvents: 'none',
-          background: `radial-gradient(circle at ${tilt.spotX * 100}% ${tilt.spotY * 100}%, rgba(255,255,255,0.12) 0%, transparent 70%)`,
+          position: 'absolute', inset: 0, borderRadius: 6, pointerEvents: 'none', zIndex: 2,
+          background: `radial-gradient(circle at ${tilt.spotX * 100}% ${tilt.spotY * 100}%, rgba(255,255,255,0.10) 0%, transparent 65%)`,
         }} />
       )}
-      <div style={{ height: 4, borderRadius: '6px 6px 0 0', background: ACCENT_COLORS[index % 4] }} />
-      <div style={{ padding: '16px 20px 20px 20px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 8, marginBottom: 10 }}>
-          <p style={{ fontFamily: SERIF, fontSize: 15, fontWeight: 700, color: C.heading, margin: 0, flex: '1 1 auto' }}>{project.title}</p>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', flexShrink: 0 }}>
-            {project.liveUrl && <a href={project.liveUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>🌐 Live</a>}
-            {project.repoUrl && <a href={project.repoUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>⬡ Frontend</a>}
-            {project.repoUrlBackend && <a href={project.repoUrlBackend} target="_blank" rel="noopener noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>⬡ Backend</a>}
-            {project.apiDocsUrl && <a href={project.apiDocsUrl} target="_blank" rel="noopener noreferrer" style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>📖 API Docs</a>}
-          </div>
+
+      {/* Top accent bar */}
+      <div style={{ height: 3, borderRadius: '6px 6px 0 0', background: ACCENT_COLORS[index % 4], flexShrink: 0 }} />
+
+      {/* Video */}
+      <div style={{ position: 'relative', overflow: 'hidden', borderBottom: `1px solid ${C.cardBorder}`, background: C.btnBg, minHeight: 200 }}>
+        <video
+          ref={videoRef}
+          src={`/videos/${project.id}.mp4`}
+          muted
+          loop
+          playsInline
+          autoPlay
+          preload="auto"
+          webkit-playsinline="true"
+          x5-playsinline="true"
+          x5-video-player-type="h5"
+          x5-video-player-fullscreen="false"
+          style={{
+            width: '100%',
+            height: 200,
+            objectFit: 'cover',
+            display: 'block',
+            background: C.btnBg,
+          }}
+        />
+        {/* Video overlay gradient for polish */}
+        <div style={{
+          position: 'absolute',
+          bottom: 0, left: 0, right: 0,
+          height: 40,
+          background: `linear-gradient(to bottom, transparent, ${C.cardBg})`,
+          pointerEvents: 'none',
+        }} />
+      </div>
+
+      {/* Card content */}
+      <div style={{ padding: isMobile ? '12px 14px 16px 14px' : '14px 18px 18px 18px' }}>
+
+        {/* Title */}
+        <p style={{ fontFamily: SERIF, fontSize: 14, fontWeight: 700, color: C.heading, margin: '0 0 8px 0', lineHeight: 1.4 }}>
+          {project.title}
+        </p>
+
+        {/* Links row */}
+        <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap', marginBottom: 10 }}>
+          {project.liveUrl && (
+            <a href={project.liveUrl} target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+              🌐 Live
+            </a>
+          )}
+          {project.repoUrl && (
+            <a href={project.repoUrl} target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>
+              ⬡ Frontend
+            </a>
+          )}
+          {project.repoUrlBackend && (
+            <a href={project.repoUrlBackend} target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>
+              ⬡ Backend
+            </a>
+          )}
+          {project.apiDocsUrl && (
+            <a href={project.apiDocsUrl} target="_blank" rel="noopener noreferrer"
+              style={{ fontFamily: MONO, fontSize: 11, color: C.link, textDecoration: 'none' }}>
+              📖 API Docs
+            </a>
+          )}
         </div>
-        <p style={{ fontFamily: MONO, fontSize: 12, color: C.body, lineHeight: 1.75, margin: '0 0 12px 0' }}>{project.description}</p>
-        {project.features && project.features.length > 0 && (
-          <ul style={{ margin: '0 0 12px 0', paddingLeft: 18, listStyleType: 'disc' }}>
-            {project.features.map((f, fi) => (
-              <li key={fi} style={{ fontFamily: MONO, fontSize: 11, color: C.body, lineHeight: 1.75, marginBottom: 3 }}>{f}</li>
+
+        {/* Description */}
+        <p style={{ fontFamily: MONO, fontSize: 11, color: C.body, lineHeight: 1.7, margin: '0 0 12px 0' }}>
+          {project.description}
+        </p>
+
+        {/* User count badge */}
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          background: C.btnBg, borderRadius: 4, padding: '5px 12px',
+          marginBottom: 12,
+        }}>
+          <span style={{ fontFamily: MONO, fontSize: 11, color: '#ffffff', opacity: 0.7 }}>👥 Users</span>
+          <span style={{ fontFamily: MONO, fontSize: 13, fontWeight: 700, color: '#ffffff' }}>{project.userCount}</span>
+        </div>
+
+        {/* Key Features */}
+        <div style={{ marginBottom: 12 }}>
+          <p style={{ fontFamily: MONO, fontSize: 10, fontWeight: 700, color: C.muted, letterSpacing: '0.08em', textTransform: 'uppercase', margin: '0 0 8px 0' }}>
+            Key Features
+          </p>
+          <ul style={{ margin: 0, padding: 0, listStyleType: 'none' }}>
+            {project.keyFeatures.map((f, fi) => (
+              <li key={fi} style={{
+                fontFamily: MONO, fontSize: 11, color: C.body, lineHeight: 1.65,
+                marginBottom: 4, display: 'flex', alignItems: 'flex-start', gap: 6,
+              }}>
+                <span style={{ color: ACCENT_COLORS[index % 4], flexShrink: 0, marginTop: 1 }}>▸</span>
+                {f}
+              </li>
             ))}
           </ul>
-        )}
-        <div>{project.technologies.map(t => <Chip key={t} text={t} />)}</div>
+        </div>
+
+        {/* Tech chips */}
+        <div style={{ marginTop: 8, paddingTop: 10, borderTop: `1px solid ${C.cardBorder}` }}>
+          {project.technologies.map(t => <Chip key={t} text={t} />)}
+        </div>
       </div>
     </motion.div>
   );
@@ -447,15 +597,13 @@ function ProjectCard({ project, index, reducedMotion }: ProjectCardProps) {
 
 function ProjectsPage() {
   const reducedMotion = useReducedMotion() ?? false;
-  const containerRef = React.useRef<HTMLDivElement>(null);
-  const containerWidth = useContainerWidth(containerRef);
 
   return (
-    <div ref={containerRef}>
+    <div>
       <H2>Projects</H2>
       <hr style={{ border: 'none', borderTop: `1px solid ${C.hr}`, margin: '0 0 20px 0' }} />
       <div style={{ perspective: '1000px', perspectiveOrigin: '50% 50%' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 28 }}>
           {PROJECTS.map((p, i) => (
             <ProjectCard key={p.id} project={p} index={i} reducedMotion={reducedMotion} />
           ))}
