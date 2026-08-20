@@ -91,7 +91,7 @@ export const PROJECTS: ProjectEntry[] = [
     liveUrl: 'https://ride-share-frontend-zeta.vercel.app/',
     repoUrl: 'https://github.com/kaioumdev/Ride-Share-Frontend',
     repoUrlBackend: 'https://github.com/kaioumdev/Ride-Share-Backend',
-    apiDocsUrl: 'https://github.com/kaioumdev/Ride-Share-Backend/api-docs',
+    apiDocsUrl: 'https://ride-share-backend-say9.onrender.com/api-docs',
   },
   {
     id: 'lebaba',
